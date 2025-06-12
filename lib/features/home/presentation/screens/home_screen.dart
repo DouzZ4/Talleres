@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/widgets/custom_button.dart';
-import '../viewmodels/counter_viewmodel.dart';
+import '../viewmodels/counter_rx_viewmodel.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final counter = context.watch<CounterViewModel>().counter;
+    final counter = context.watch<CounterRxViewmodel>();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
@@ -17,10 +17,15 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Contador: $counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-              textAlign: TextAlign.center,
+            StreamBuilder<int>(
+              stream: counter.counterStream,
+              initialData: 0,
+              builder:
+              (_, snapshot) => Text(
+                'Contador: ${snapshot.data}',
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(height: 32),
             CustomButton(
@@ -38,16 +43,37 @@ class HomePage extends StatelessWidget {
             CustomButton(
               label: 'Incrementar contador',
               icon: Icons.add,
-              onPressed: () => context.read<CounterViewModel>().increment(),
+              onPressed: () => counter.increment(),
             ),
             CustomButton(
               label: 'Disminuir contador',
               icon: Icons.remove,
-              onPressed: () => context.read<CounterViewModel>().decrement(),
+              onPressed: () => counter.decrement(),
+            ),
+            CustomButton(
+              label: 'Reset contador',
+              icon: Icons.refresh,
+              onPressed: () => counter.reset(),
+            ),
+            const SizedBox(height: 24),
+            StreamBuilder<List<int>>(
+              stream: counter.historyStream,
+              initialData: const [0],
+              builder: (_, snapshot) {
+                final history = snapshot.data ?? [];
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Historial de valores:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ...history.reversed.map((v) => Text('• $v')).toList(),
+                  ],
+                );
+              },
             ),
           ],
         ),
       ),
     );
   }
+  
 }

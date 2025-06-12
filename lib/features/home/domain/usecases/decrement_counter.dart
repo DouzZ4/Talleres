@@ -1,5 +1,13 @@
+import '../entities/counter.dart';
+import '../../data/counter_repository_impl.dart';
+
 class DecrementCounter {
-  void call(int currentValue, void Function(int) updateValue) {
-    updateValue(currentValue - 1);
+  final CounterRepositoryImpl _repo;
+  DecrementCounter(this._repo);
+
+  Counter call() {
+    _repo.DecrementCounter();
+    final newValue = _repo.getCurrent();
+    return Counter(newValue);
   }
 }
